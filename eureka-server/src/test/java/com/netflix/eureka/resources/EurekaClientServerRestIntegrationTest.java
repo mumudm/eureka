@@ -69,28 +69,42 @@ public class EurekaClientServerRestIntegrationTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        injectEurekaConfiguration();
-        startServer();
-        createEurekaServerConfig();
+//        injectEurekaConfiguration();
+//        startServer();
+//        createEurekaServerConfig();
+//
+//        httpClientFactory = JerseyEurekaHttpClientFactory.newBuilder()
+//                .withClientName("testEurekaClient")
+//                .withConnectionTimeout(1000)
+//                .withReadTimeout(1000)
+//                .withMaxConnectionsPerHost(1)
+//                .withMaxTotalConnections(1)
+//                .withConnectionIdleTimeout(1000)
+//                .build();
+//
+//        jerseyEurekaClient = httpClientFactory.newClient(new DefaultEndpoint(eurekaServiceUrl));
+//
+//        ServerCodecs serverCodecs = new DefaultServerCodecs(eurekaServerConfig);
+//        jerseyReplicationClient = JerseyReplicationClient.createReplicationClient(
+//                eurekaServerConfig,
+//                serverCodecs,
+//                eurekaServiceUrl
+//        );
 
-        httpClientFactory = JerseyEurekaHttpClientFactory.newBuilder()
-                .withClientName("testEurekaClient")
-                .withConnectionTimeout(1000)
-                .withReadTimeout(1000)
-                .withMaxConnectionsPerHost(1)
-                .withMaxTotalConnections(1)
-                .withConnectionIdleTimeout(1000)
-                .build();
+        server = new Server(8080);
 
-        jerseyEurekaClient = httpClientFactory.newClient(new DefaultEndpoint(eurekaServiceUrl));
+        WebAppContext webAppCtx = new WebAppContext(new File("./eureka-server/src/main/webapp").getAbsolutePath(), "/");
+        webAppCtx.setDescriptor(new File("./eureka-server/src/main/webapp/WEB-INF/web.xml").getAbsolutePath());
+        webAppCtx.setResourceBase(new File("./eureka-server/src/main/resources").getAbsolutePath());
+        webAppCtx.setClassLoader(Thread.currentThread().getContextClassLoader());
+        server.setHandler(webAppCtx);
+        server.start();
 
-        ServerCodecs serverCodecs = new DefaultServerCodecs(eurekaServerConfig);
-        jerseyReplicationClient = JerseyReplicationClient.createReplicationClient(
-                eurekaServerConfig,
-                serverCodecs,
-                eurekaServiceUrl
-        );
+        eurekaServiceUrl = "http://localhost:8080/v2";
+
+
     }
+
 
     @AfterClass
     public static void tearDown() throws Exception {
